@@ -28,7 +28,7 @@ export class AppComponent implements AfterContentInit {
     this.camera.position.z = 5;
     this.animate();
   }
-  onResize() {
+  onResize(event) {
     this.camera.aspect = this.el.clientWidth / this.el.clientHeight;
     this.camera.updateProjectionMatrix();
 
