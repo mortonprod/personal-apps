@@ -28,6 +28,12 @@ export class AppComponent implements AfterContentInit {
     this.camera.position.z = 5;
     this.animate();
   }
+  onResize() {
+    this.camera.aspect = this.el.clientWidth / this.el.clientHeight;
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize( this.el.clientWidth , this.el.clientHeight );
+  }
   animate() {
     requestAnimationFrame(this.animate.bind(this));
     this.cube.rotation.x += 0.01;
