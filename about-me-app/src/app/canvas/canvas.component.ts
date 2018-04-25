@@ -1,4 +1,4 @@
-import { Component, AfterContentInit  } from '@angular/core';
+import { Component, AfterContentInit, Input  } from '@angular/core';
 import * as THREE from 'three';
 
 @Component({
@@ -13,7 +13,11 @@ export class CanvasComponent implements AfterContentInit {
   camera;
   el: HTMLElement;
   cube: THREE.Mesh;
+  @Input() angleX: number;
+  @Input() angleY: number;
   constructor() {
+    this.angleX = 0;
+    this.angleY = 0;
   }
   ngAfterContentInit() {
     this.el = document.getElementById('canvas');
@@ -37,8 +41,10 @@ export class CanvasComponent implements AfterContentInit {
   }
   animate() {
     requestAnimationFrame(this.animate.bind(this));
-    this.cube.rotation.x += 0.01;
-    this.cube.rotation.y += 0.01;
+    // this.cube.rotation.x += 0.01;
+    // this.cube.rotation.y += 0.01;
+    this.cube.rotation.x = this.angleX;
+    this.cube.rotation.y = this.angleY;
     this.renderer.render(this.scene, this.camera);
   }
 

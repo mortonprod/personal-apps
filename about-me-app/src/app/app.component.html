@@ -12,7 +12,7 @@
 
 </mat-expansion-panel> -->
 <div class="full" (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)">
-  <app-canvas>
+  <app-canvas [angleX]="angleX" [angleY]="angleY">
 
   </app-canvas>
 </div>

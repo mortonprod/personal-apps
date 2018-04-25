@@ -9,10 +9,12 @@ export class AppComponent  {
   isActive: Boolean;
   clientX: number;
   clientY: number;
+  angleX: number;
+  angleY: number;
   onMouseMove(event: MouseEvent): void {
-    this.clientX = event.clientX;
-    this.clientY = event.clientY;
-    console.log(`client ${this.clientX} ${this.clientY}`);
+    this.angleX = event.clientX;
+    this.angleY = event.clientY;
+    console.log(`client ${this.angleX} ${this.angleY}`);
   }
   onMouseDown(event: MouseEvent) {
     this.isActive = true;
