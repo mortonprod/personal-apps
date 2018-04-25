@@ -13,9 +13,6 @@ export class CanvasComponent implements AfterContentInit {
   camera;
   el: HTMLElement;
   cube: THREE.Mesh;
-  isActive: Boolean;
-  clientX: number;
-  clientY: number;
   constructor() {
   }
   ngAfterContentInit() {
@@ -43,19 +40,6 @@ export class CanvasComponent implements AfterContentInit {
     this.cube.rotation.x += 0.01;
     this.cube.rotation.y += 0.01;
     this.renderer.render(this.scene, this.camera);
-  }
-  onMouseMove(event: MouseEvent): void {
-    this.clientX = event.clientX;
-    this.clientY = event.clientY;
-    console.log(`client ${this.clientX} ${this.clientY} ${this.el.clientWidth} ${this.el.clientHeight}`);
-  }
-  onMouseDown(event: MouseEvent) {
-    this.isActive = true;
-    console.log(`isActive: ${this.isActive}`);
-  }
-  onMouseUp(event: MouseEvent) {
-    this.isActive = false;
-    console.log(`isActive: ${this.isActive}`);
   }
 
 }
