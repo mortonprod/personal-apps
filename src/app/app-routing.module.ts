@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {MountainComponent} from './mountain/mountain.component';
+import {AppComponent} from './app.component';
 
 const routes: Routes = [
-    { path: 'app', component: MountainComponent },
+    { path: 'app', component: AppComponent },
     // { path: 'templates/script', component: MessageComponent },
     // { path: '**', redirectTo: '404' }
 ];
