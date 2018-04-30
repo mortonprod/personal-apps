@@ -5,11 +5,13 @@ import { NgModule } from '@angular/core';
 
 
 import { AppComponent } from './app.component';
+import { MountainComponent } from './mountain/mountain.component';
 
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    MountainComponent
   ],
   imports: [
     BrowserModule,
