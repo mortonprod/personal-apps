@@ -7,22 +7,11 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'app';
-  xLength: number;
-  yLength: number;
-  xNumberSegments: number;
-  yNumberSegments: number;
-  fovCamera: number;
-  aspectCamera: number;
-  nearCamera: number;
-  farCamera: number;
+  plane: {xLength: number; yLength: number; xNumberSegments: number; yNumberSegments: number};
+  camera: {position: IPosition, fov: number; aspect: number; near: number; far: number};
   constructor() {
-    this.xLength = 300;
-    this.yLength = 300;
-    this.xNumberSegments = 10;
-    this.yNumberSegments = 10;
-    this.fovCamera = 75;
-    this.aspectCamera = 200;
-    this.nearCamera = 0.1;
-    this.farCamera = 1000;
+    this.plane = {xLength: 200, yLength: 200, xNumberSegments: 10, yNumberSegments: 10};
+    const cameraPosition = {x: 0, y: 0, z: 10};
+    this.camera = {position: cameraPosition, fov: 75, aspect: 0.1, near: 0.1, far: 1000};
   }
 }

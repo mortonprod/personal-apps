@@ -8,18 +8,21 @@ import * as THREE from 'three';
 })
 export class MountainComponent implements AfterContentInit, OnChanges {
   el: HTMLElement;
-  @Input() xLength: number;
-  @Input() yLength: number;
-  @Input() xNumberSegments: number;
-  @Input() yNumberSegments: number;
-  @Input() fovCamera: number;
-  @Input() aspectCamera: number;
-  @Input() nearCamera: number;
-  @Input() farCamera: number;
-  scene: THREE.scene;
-  camera: THREE.camera;
-  renderer: THREE.renderer;
+  /**
+   * Plane geometry parameters
+   * The plane is always along the x and y axis.
+   */
+  @Input() plane: {xLength: number; yLength: number; xNumberSegments: number; yNumberSegments: number};
+  /**
+   * The camera is composed of the angle (y axis) spread of camera (fov),
+   * the aspect which determines the spread in (x axis),
+   * the near and far plane which determines what volume is included in the field of view,
+   * and the position of the camera.
+   */
+  @Input() camera: {position: IPosition, fov: number; aspect: number; near: number; far: number};
+  three: {scene: THREE.scene; camera: THREE.camera; renderer: THREE.renderer};
   constructor() {
+    this.three = {scene: undefined, camera: undefined, renderer: undefined};
   }
   /**
    *  Where the canvas div is present draw for the first time and initialise all the needed objects.
@@ -28,19 +31,24 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     // Get the canvas div.
     this.el = document.getElementById('canvas');
     // Create the geometry, material and the mesh.
-    const geometry = new THREE.PlaneGeometry(this.xLength, this.yLength, this.xNumberSegments, this.yNumberSegments);
+    const geometry = new THREE.PlaneGeometry(
+      this.plane.xLength,
+      this.plane.yLength,
+      this.plane.xNumberSegments,
+      this.plane.yNumberSegments
+    );
     const material = new THREE.MeshPhongMaterial({
       color: 0xdddddd
     });
     const mesh = new THREE.Mesh(geometry, material);
     // Create the renderer, camera and scene we will plot each frame.
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize(this.xLength, this.yLength);
-    this.el.appendChild(this.renderer.domElement);
-    this.scene = new THREE.Scene();
-    this.scene.add(mesh);
-    this.camera = new THREE.PerspectiveCamera(this.fovCamera, this.aspectCamera, this.nearCamera, this.farCamera);
-    this.camera.position.z = 10;
+    this.three.renderer = new THREE.WebGLRenderer();
+    this.three.renderer.setSize(this.el.clientWidth, this.el.clientHeight);
+    this.el.appendChild(this.three.renderer.domElement);
+    this.three.scene = new THREE.Scene();
+    this.three.scene.add(mesh);
+    this.camera = new THREE.PerspectiveCamera(this.camera.fov, this.camera.aspect, this.camera.near, this.camera.far);
+    this.camera.position = this.camera.position;
     this.animate();
   }
   /**
@@ -49,15 +57,15 @@ export class MountainComponent implements AfterContentInit, OnChanges {
    * USE ON CHANGES OBJECT TO DETERMINE WHAT CHANGED AND WHAT WE NEED TO RECALCULATE.
    */
   ngOnChanges(changes: SimpleChanges) {
-    const xLengthChangePrevious: SimpleChange = changes.xLength.previousValue;
-    const xLengthChangeCurrent: SimpleChange = changes.xLength.currentValue;
+    // const xLengthChangePrevious: SimpleChange = changes.xLength.previousValue;
+    // const xLengthChangeCurrent: SimpleChange = changes.xLength.currentValue;
   }
   /**
    * This is called for each frame.
    */
   animate() {
     requestAnimationFrame(this.animate.bind(this));
-    this.renderer.render(this.scene, this.camera);
+    this.three.renderer.render(this.three.scene, this.camera);
   }
 
 }

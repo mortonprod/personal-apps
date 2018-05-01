@@ -12,13 +12,6 @@
 
 </mat-expansion-panel> -->
 <div class="full">
-
-  <app-mountain [xLength]="xLength" [yLength]="yLength" [xNumberSegments]="xNumberSegments" [yNumberSegments]="yNumberSegments"
-  [fovCamera]="fovCamera"
-  [aspectCamera]="aspectCamera" 
-  [nearCamera]="nearCamera"
-  [farCamera]="farCamera"
-  >
-  </app-mountain>
+  <app-mountain [plane]="plane" [camera]="camera"></app-mountain>
 </div>
 <router-outlet></router-outlet>
