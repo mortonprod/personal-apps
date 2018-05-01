@@ -20,7 +20,7 @@ export class MountainComponent implements AfterContentInit, OnChanges {
    * and the position of the camera.
    */
   @Input() camera: {position: IPosition, fov: number; aspect: number; near: number; far: number};
-  three: {scene: THREE.scene; camera: THREE.camera; renderer: THREE.renderer};
+  three: {scene: THREE.Scene; camera: THREE.Camera; renderer: THREE.Renderer};
   constructor() {
     this.three = {scene: undefined, camera: undefined, renderer: undefined};
   }
@@ -49,6 +49,8 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     this.three.scene.add(mesh);
     this.camera = new THREE.PerspectiveCamera(this.camera.fov, this.camera.aspect, this.camera.near, this.camera.far);
     this.camera.position = this.camera.position;
+    // this.three.camera.position = this.camera.position;
+    this.three.camera.rotateX(90);
     this.animate();
   }
   /**
