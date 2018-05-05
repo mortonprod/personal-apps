@@ -14,7 +14,7 @@ export class MountainComponent implements AfterContentInit, OnChanges {
    * Plane geometry parameters
    * The plane is always along the x and y axis.
    */
-  @Input() plane: {xLength: number; yLength: number; xNumberSegments: number; yNumberSegments: number};
+  @Input() plane: {length: number; segments: number};
   /**
    * The camera is composed of the angle (y axis) spread of camera (fov),
    * the aspect which determines the spread in (x axis),
@@ -36,15 +36,16 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     this.el = document.getElementById('canvas');
     // Create the geometry, material and the mesh.
     const geometry = new THREE.PlaneGeometry(
-      this.plane.xLength,
-      this.plane.yLength,
-      this.plane.xNumberSegments,
-      this.plane.yNumberSegments
+      this.plane.length,
+      this.plane.length,
+      this.plane.segments,
+      this.plane.segments
     );
-    randomVertices(geometry);
+    // randomVertices(geometry);
+    centreMountain(geometry, 10000000);
     const material = new THREE.MeshPhongMaterial({
       color: '#6000C7',
-      side: THREE.DoubleSide,
+      // side: THREE.DoubleSide,
       wireframe: true
     });
     const mesh = new THREE.Mesh(geometry, material);
@@ -94,13 +95,32 @@ export class MountainComponent implements AfterContentInit, OnChanges {
 
 }
 /**
+ * Create Mountain from random plane geometry.
+ * Geometry has a list of vertices which equate to x and y.
+ * Plane with nX/xY slabs has (nX+1)/(nY+1) vertices.
+ * Work out Gaussian shape form input geometry and then change z position.
+ * ASSUME SQUARE! COMBINED GAUSSIANS IT NOT EXACTLY NORMALISED CORRECTLY.
+ */
+
+ function centreMountain(geometry: THREE.PlaneGeometry, normal) {
+  const lastVertex = geometry.vertices[geometry.vertices.length - 1 ];
+  const distribution = gaussian(0 , 30 * Math.abs(lastVertex.x));
+  for (let i = 0; i < geometry.vertices.length; i++) {
+    const zIncrease = ( 0.5 * normal * distribution.pdf(geometry.vertices[i].x) * distribution.pdf(geometry.vertices[i].y));
+    const newZ =  geometry.vertices[i].z + zIncrease;
+    geometry.vertices[i].z = newZ;
+    console.log(`${i} x: ${geometry.vertices[i].x} y: ${geometry.vertices[i].y} z: ${geometry.vertices[i].z} ${distribution.pdf(0)}`);
+  }
+
+ }
+/**
  * Add random variance to vertices.
  */
 function randomVertices(geometry: THREE.PlaneGeometry) {
-  for (let i = 0, l = geometry.vertices.length; i < l; i++) {
-    const z = gaussianCentre(Math.random(), 500);
-    console.log(`z: ${z}`);
-    geometry.vertices[i].z = z;
+  for (let i = 0; i < geometry.vertices.length; i++) {
+    const z = gaussianCentre(Math.random(), 1000);
+    console.log(`Random ${i} x: ${geometry.vertices[i].x} y: ${geometry.vertices[i].y} z: ${geometry.vertices[i].z} add z: ${z}`);
+    geometry.vertices[i].z = geometry.vertices[i].z + z;
   }
 }
 /**
