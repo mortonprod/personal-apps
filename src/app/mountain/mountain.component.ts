@@ -1,5 +1,6 @@
 import { Component, AfterContentInit, Input, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
 import * as THREE from 'three';
+import * as gaussian from 'gaussian';
 const OrbitControls = require('three-orbit-controls')(THREE);
 
 @Component({
@@ -40,6 +41,7 @@ export class MountainComponent implements AfterContentInit, OnChanges {
       this.plane.xNumberSegments,
       this.plane.yNumberSegments
     );
+    randomVertices(geometry);
     const material = new THREE.MeshPhongMaterial({
       color: '#6000C7',
       side: THREE.DoubleSide,
@@ -90,4 +92,24 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     this.three.renderer.render(this.three.scene, this.three.camera);
   }
 
+}
+/**
+ * Add random variance to vertices.
+ */
+function randomVertices(geometry: THREE.PlaneGeometry) {
+  for (let i = 0, l = geometry.vertices.length; i < l; i++) {
+    const z = gaussianCentre(Math.random(), 500);
+    console.log(`z: ${z}`);
+    geometry.vertices[i].z = z;
+  }
+}
+/**
+ * This is a Gaussian which is centred on 0 by default.
+ * The integrated area is 1 by default since it's a pdf.
+ * The variance is 1 by default.
+ * The x value gives the location on the Gaussain curve we should sample from.
+ */
+function gaussianCentre(x: number, normal = 1, variance = 1, mean = 0) {
+  const distribution = gaussian(mean, variance);
+  return normal * distribution.pdf(x);
 }
