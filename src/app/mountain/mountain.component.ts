@@ -11,6 +11,7 @@ const OrbitControls = require('three-orbit-controls')(THREE);
 })
 export class MountainComponent implements AfterContentInit, OnChanges {
   el: HTMLElement;
+  images: string[];
   /**
    * Plane geometry parameters
    * The plane is always along the x and y axis.
@@ -28,6 +29,14 @@ export class MountainComponent implements AfterContentInit, OnChanges {
   three: {scene: THREE.Scene; camera: THREE.PerspectiveCamera; renderer: THREE.WebGLRenderer};
   constructor() {
     this.three = {scene: undefined, camera: undefined, renderer: undefined};
+    this.images = [
+      'assets/greyStone0.jpeg',
+      'assets/greyStone1.jpeg',
+      'assets/greyStone2.jpeg',
+      'assets/greyStone3.jpeg',
+      'assets/pinkStone.jpeg',
+      'assets/orangeStone.jpeg'
+    ];
   }
   /**
    *  Where the canvas div is present draw for the first time and initialise all the needed objects.
@@ -46,14 +55,9 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     randomVertices(geometry, 500);
     // The volume of the moutain in the first parameter and the second is the multiple of the diagonal of covariance matrix.
     centreMountain(geometry, 7000000, 20);
-    const texture = await new THREE.TextureLoader().load( 'assets/greyStone.jpeg' );
-    const material = new THREE.MeshLambertMaterial({
-      // color: '#6000C7',
-      map: texture
-      // side: THREE.DoubleSide,
-      // wireframe: true
-    });
-    const mesh = new THREE.Mesh(geometry, material);
+    const materials = createMesh(this.images);
+    randomMaterials(geometry, this.images.length);
+    const mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial( materials ));
   //   const mesh = new THREE.Mesh(
   //     new THREE.CubeGeometry( 1, 1, 1 ),
   //     new THREE.MeshNormalMaterial()
@@ -122,7 +126,7 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     const zIncrease = normal * multiGaussian.density([geometry.vertices[i].x, geometry.vertices[i].y]);
     const newZ =  geometry.vertices[i].z + zIncrease;
     geometry.vertices[i].z = newZ;
-    console.log(`${i} x: ${geometry.vertices[i].x} y: ${geometry.vertices[i].y} z: ${geometry.vertices[i].z}`);
+    // console.log(`${i} x: ${geometry.vertices[i].x} y: ${geometry.vertices[i].y} z: ${geometry.vertices[i].z}`);
   }
 
  }
@@ -132,7 +136,7 @@ export class MountainComponent implements AfterContentInit, OnChanges {
 function randomVertices(geometry: THREE.PlaneGeometry, normal: number) {
   for (let i = 0; i < geometry.vertices.length; i++) {
     const z = gaussianCentre(Math.random(), normal);
-    console.log(`Random ${i} x: ${geometry.vertices[i].x} y: ${geometry.vertices[i].y} z: ${geometry.vertices[i].z} add z: ${z}`);
+    // console.log(`Random ${i} x: ${geometry.vertices[i].x} y: ${geometry.vertices[i].y} z: ${geometry.vertices[i].z} add z: ${z}`);
     geometry.vertices[i].z = geometry.vertices[i].z + z;
   }
 }
@@ -145,4 +149,23 @@ function randomVertices(geometry: THREE.PlaneGeometry, normal: number) {
 function gaussianCentre(x: number, normal = 1, variance = 1, mean = 0) {
   const distribution = gaussian(mean, variance);
   return normal * distribution.pdf(x);
+}
+
+function randomMaterials(geometry: THREE.PlaneGeometry, num: number) {
+  for (let i = 0; i < geometry.faces.length; i++) {
+    geometry.faces[ i ].materialIndex = Math.floor(Math.random() * num);
+  }
+}
+
+function createMesh(images: Array<string>) {
+  const materials = [];
+  // for (let i = 0; i < images.length; i++) {
+    images.forEach(async (image) => {
+    const texture = await new THREE.TextureLoader().load( image );
+    const material = new THREE.MeshLambertMaterial({
+      map: texture
+    });
+    materials.push(material);
+  });
+  return materials;
 }
