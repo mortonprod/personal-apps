@@ -46,10 +46,12 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     randomVertices(geometry, 500);
     // The volume of the moutain in the first parameter and the second is the multiple of the diagonal of covariance matrix.
     centreMountain(geometry, 7000000, 20);
-    const material = new THREE.MeshPhongMaterial({
-      color: '#6000C7',
+    const texture = await new THREE.TextureLoader().load( 'assets/greyStone.jpeg' );
+    const material = new THREE.MeshLambertMaterial({
+      // color: '#6000C7',
+      map: texture
       // side: THREE.DoubleSide,
-      wireframe: true
+      // wireframe: true
     });
     const mesh = new THREE.Mesh(geometry, material);
   //   const mesh = new THREE.Mesh(
