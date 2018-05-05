@@ -11,8 +11,7 @@ const OrbitControls = require('three-orbit-controls')(THREE);
 })
 export class MountainComponent implements AfterContentInit, OnChanges {
   el: HTMLElement;
-  imagesStone: string[];
-  imagesGrass: string[];
+  images: string[];
   /**
    * Plane geometry parameters
    * The plane is always along the x and y axis.
@@ -30,18 +29,17 @@ export class MountainComponent implements AfterContentInit, OnChanges {
   three: {scene: THREE.Scene; camera: THREE.PerspectiveCamera; renderer: THREE.WebGLRenderer};
   constructor() {
     this.three = {scene: undefined, camera: undefined, renderer: undefined};
-    this.imagesStone = [
+    this.images = [
+      'assets/green0.jpeg',
+      'assets/green1.jpeg',
+      'assets/green2.jpeg',
+      'assets/pinkStone.jpeg',
+      'assets/orangeStone.jpeg',
       'assets/greyStone0.jpeg',
       'assets/greyStone1.jpeg',
       'assets/greyStone2.jpeg',
       'assets/greyStone3.jpeg',
-      'assets/pinkStone.jpeg',
-      'assets/orangeStone.jpeg'
-    ];
-    this.imagesGrass = [
-      'assets/green0.jpeg',
-      'assets/green1.jpeg',
-      'assets/green2.jpeg',
+      'assets/snow.jpeg',
     ];
   }
   /**
@@ -60,9 +58,13 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     // 500 is the area of the gaussian.
     // randomVertices(geometry, 500);
     // The volume of the moutain in the first parameter and the second is the multiple of the diagonal of covariance matrix.
-    centreMountain(geometry, 7000000, 20);
-    const materials = createMesh(this.imagesGrass);
-    randomMaterials(geometry, this.imagesGrass.length);
+    centreMountain(geometry, 20000000, 20);
+    const materials = createMesh(this.images);
+    // randomMaterials(geometry, this.images.length);
+    materialHeightSegment(geometry, 0, 2, 0, 0.01);
+    materialHeightSegment(geometry, 3, 5, 0.01, 0.2);
+    materialHeightSegment(geometry, 5, 8, 0.2, 0.7);
+    materialHeightSegment(geometry, 9, 9, 0.7, 1);
     const mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial( materials ));
   //   const mesh = new THREE.Mesh(
   //     new THREE.CubeGeometry( 1, 1, 1 ),
@@ -163,6 +165,34 @@ function randomMaterials(geometry: THREE.PlaneGeometry, num: number) {
     // geometry.faces[ i ].materialIndex = 0;
   }
 }
+/**
+ * This function will put an image or a selection image at particular segement height of the mountain.
+ * The height goes between 0 and 1.
+ * The total height of the mountain is calculated from the middle face.
+ */
+function materialHeightSegment(geometry: THREE.PlaneGeometry, minImage: number, maxImage: number, fracMin: number, fracMax: number) {
+  const maxHeight = getMaxHeight(geometry) + 1; // Add small increase to get top.
+  for (let i = 0; i < geometry.faces.length; i++) {
+    const face = geometry.faces[ i ];
+    const height = geometry.vertices[ face.a ].z;
+    // console.log(height);
+    if ( maxHeight * fracMin < height && maxHeight * fracMax > height ) {
+      geometry.faces[ i ].materialIndex = Math.floor(Math.random() * (maxImage - minImage)) + minImage;
+    }
+  }
+}
+
+function getMaxHeight(geometry) {
+  let temp = 0;
+  for (let i = 0; i < geometry.faces.length; i++) {
+    const face = geometry.faces[ i ];
+    const height = geometry.vertices[ face.a ].z;
+    if (height > temp){
+      temp = height;
+    }
+  }
+  return temp;
+};
 
 function createMesh(images: Array<string>) {
   const materials = [];
