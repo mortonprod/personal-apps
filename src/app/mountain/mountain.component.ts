@@ -1,5 +1,6 @@
 import { Component, AfterContentInit, Input, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
 import * as THREE from 'three';
+const OrbitControls = require('three-orbit-controls')(THREE);
 
 @Component({
   selector: 'app-mountain',
@@ -20,7 +21,8 @@ export class MountainComponent implements AfterContentInit, OnChanges {
    * and the position of the camera.
    */
   @Input() camera: {position: IPosition, fov: number; aspect: number; near: number; far: number};
-  three: {scene: THREE.Scene; camera: THREE.Camera; renderer: THREE.Renderer};
+  @Input() renderer: {alpha: boolean};
+  three: {scene: THREE.Scene; camera: THREE.PerspectiveCamera; renderer: THREE.WebGLRenderer};
   constructor() {
     this.three = {scene: undefined, camera: undefined, renderer: undefined};
   }
@@ -38,20 +40,35 @@ export class MountainComponent implements AfterContentInit, OnChanges {
       this.plane.yNumberSegments
     );
     const material = new THREE.MeshPhongMaterial({
-      color: 0xdddddd
+      color: '#6000C7'
     });
-    const mesh = new THREE.Mesh(geometry, material);
+    // const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new THREE.Mesh(
+      new THREE.CubeGeometry( 1, 1, 1 ),
+      new THREE.MeshNormalMaterial()
+  );
     // Create the renderer, camera and scene we will plot each frame.
-    this.three.renderer = new THREE.WebGLRenderer();
+    this.three.renderer = new THREE.WebGLRenderer({alpha: this.renderer.alpha});
+    this.three.renderer.setClearColor(0x333F47, 1);
+    // this.three.renderer = new THREE.WebGLRenderer();
     this.three.renderer.setSize(this.el.clientWidth, this.el.clientHeight);
     this.el.appendChild(this.three.renderer.domElement);
     this.three.scene = new THREE.Scene();
     this.three.scene.add(mesh);
-    this.camera = new THREE.PerspectiveCamera(this.camera.fov, this.camera.aspect, this.camera.near, this.camera.far);
-    this.camera.position = this.camera.position;
-    // this.three.camera.position = this.camera.position;
-    this.three.camera.rotateX(90);
+    this.three.camera = new THREE.PerspectiveCamera(this.camera.fov, this.camera.aspect, this.camera.near, this.camera.far);
+    this.three.camera.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
+    // this.three.camera.rotateX(5);
+    const light = new THREE.PointLight(0xffffff);
+    light.position.set(100, 200, -100);
+    this.three.scene.add(light);
+    const controls = new OrbitControls(this.three.camera, this.three.renderer.domElement);
     this.animate();
+  }
+  onResize(event) {
+    this.camera.aspect = this.el.clientWidth / this.el.clientHeight;
+    this.three.renderer.setSize( this.el.clientWidth , this.el.clientHeight );
+    this.three.camera.updateProjectionMatrix();
+
   }
   /**
    * When the input of the component changes we will need to recalculate the drawing again.
@@ -67,7 +84,7 @@ export class MountainComponent implements AfterContentInit, OnChanges {
    */
   animate() {
     requestAnimationFrame(this.animate.bind(this));
-    this.three.renderer.render(this.three.scene, this.camera);
+    this.three.renderer.render(this.three.scene, this.three.camera);
   }
 
 }
