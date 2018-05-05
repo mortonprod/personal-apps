@@ -1,6 +1,7 @@
 import { Component, AfterContentInit, Input, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
 import * as THREE from 'three';
 import * as gaussian from 'gaussian';
+import * as MultiGaussian from 'multivariate-gaussian';
 const OrbitControls = require('three-orbit-controls')(THREE);
 
 @Component({
@@ -41,8 +42,10 @@ export class MountainComponent implements AfterContentInit, OnChanges {
       this.plane.segments,
       this.plane.segments
     );
-    // randomVertices(geometry);
-    centreMountain(geometry, 10000000);
+    // 500 is the area of the gaussian.
+    randomVertices(geometry, 500);
+    // The volume of the moutain in the first parameter and the second is the multiple of the diagonal of covariance matrix.
+    centreMountain(geometry, 7000000, 20);
     const material = new THREE.MeshPhongMaterial({
       color: '#6000C7',
       // side: THREE.DoubleSide,
@@ -98,27 +101,35 @@ export class MountainComponent implements AfterContentInit, OnChanges {
  * Create Mountain from random plane geometry.
  * Geometry has a list of vertices which equate to x and y.
  * Plane with nX/xY slabs has (nX+1)/(nY+1) vertices.
- * Work out Gaussian shape form input geometry and then change z position.
- * ASSUME SQUARE! COMBINED GAUSSIANS IT NOT EXACTLY NORMALISED CORRECTLY.
+ * Normal the the total volume of the mountain.
+ * The variance factor is the multiple of the variance 
  */
 
- function centreMountain(geometry: THREE.PlaneGeometry, normal) {
+ function centreMountain(geometry: THREE.PlaneGeometry, normal: number, varianceFactor: number) {
   const lastVertex = geometry.vertices[geometry.vertices.length - 1 ];
+  const vara = Math.abs(lastVertex.x) * varianceFactor;
+  const sigma = [[vara, 0], [0, vara]];
+  const mu = [0, 0];
+  const param = {
+    sigma,
+    mu
+  };
+  const multiGaussian = new MultiGaussian(param);
   const distribution = gaussian(0 , 30 * Math.abs(lastVertex.x));
   for (let i = 0; i < geometry.vertices.length; i++) {
-    const zIncrease = ( 0.5 * normal * distribution.pdf(geometry.vertices[i].x) * distribution.pdf(geometry.vertices[i].y));
+    const zIncrease = normal * multiGaussian.density([geometry.vertices[i].x, geometry.vertices[i].y]);
     const newZ =  geometry.vertices[i].z + zIncrease;
     geometry.vertices[i].z = newZ;
-    console.log(`${i} x: ${geometry.vertices[i].x} y: ${geometry.vertices[i].y} z: ${geometry.vertices[i].z} ${distribution.pdf(0)}`);
+    console.log(`${i} x: ${geometry.vertices[i].x} y: ${geometry.vertices[i].y} z: ${geometry.vertices[i].z}`);
   }
 
  }
 /**
  * Add random variance to vertices.
  */
-function randomVertices(geometry: THREE.PlaneGeometry) {
+function randomVertices(geometry: THREE.PlaneGeometry, normal: number) {
   for (let i = 0; i < geometry.vertices.length; i++) {
-    const z = gaussianCentre(Math.random(), 1000);
+    const z = gaussianCentre(Math.random(), normal);
     console.log(`Random ${i} x: ${geometry.vertices[i].x} y: ${geometry.vertices[i].y} z: ${geometry.vertices[i].z} add z: ${z}`);
     geometry.vertices[i].z = geometry.vertices[i].z + z;
   }
