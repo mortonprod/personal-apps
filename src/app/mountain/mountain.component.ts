@@ -11,7 +11,8 @@ const OrbitControls = require('three-orbit-controls')(THREE);
 })
 export class MountainComponent implements AfterContentInit, OnChanges {
   el: HTMLElement;
-  images: string[];
+  imagesStone: string[];
+  imagesGrass: string[];
   /**
    * Plane geometry parameters
    * The plane is always along the x and y axis.
@@ -29,13 +30,18 @@ export class MountainComponent implements AfterContentInit, OnChanges {
   three: {scene: THREE.Scene; camera: THREE.PerspectiveCamera; renderer: THREE.WebGLRenderer};
   constructor() {
     this.three = {scene: undefined, camera: undefined, renderer: undefined};
-    this.images = [
+    this.imagesStone = [
       'assets/greyStone0.jpeg',
       'assets/greyStone1.jpeg',
       'assets/greyStone2.jpeg',
       'assets/greyStone3.jpeg',
       'assets/pinkStone.jpeg',
       'assets/orangeStone.jpeg'
+    ];
+    this.imagesGrass = [
+      'assets/green0.jpeg',
+      'assets/green1.jpeg',
+      'assets/green2.jpeg',
     ];
   }
   /**
@@ -52,11 +58,11 @@ export class MountainComponent implements AfterContentInit, OnChanges {
       this.plane.segments
     );
     // 500 is the area of the gaussian.
-    randomVertices(geometry, 500);
+    // randomVertices(geometry, 500);
     // The volume of the moutain in the first parameter and the second is the multiple of the diagonal of covariance matrix.
     centreMountain(geometry, 7000000, 20);
-    const materials = createMesh(this.images);
-    randomMaterials(geometry, this.images.length);
+    const materials = createMesh(this.imagesGrass);
+    randomMaterials(geometry, this.imagesGrass.length);
     const mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial( materials ));
   //   const mesh = new THREE.Mesh(
   //     new THREE.CubeGeometry( 1, 1, 1 ),
@@ -154,6 +160,7 @@ function gaussianCentre(x: number, normal = 1, variance = 1, mean = 0) {
 function randomMaterials(geometry: THREE.PlaneGeometry, num: number) {
   for (let i = 0; i < geometry.faces.length; i++) {
     geometry.faces[ i ].materialIndex = Math.floor(Math.random() * num);
+    // geometry.faces[ i ].materialIndex = 0;
   }
 }
 
