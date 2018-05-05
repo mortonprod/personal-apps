@@ -22,6 +22,7 @@ export class MountainComponent implements AfterContentInit, OnChanges {
    */
   @Input() camera: {position: IPosition, fov: number; aspect: number; near: number; far: number};
   @Input() renderer: {alpha: boolean};
+  @Input() light: {position: IPosition};
   three: {scene: THREE.Scene; camera: THREE.PerspectiveCamera; renderer: THREE.WebGLRenderer};
   constructor() {
     this.three = {scene: undefined, camera: undefined, renderer: undefined};
@@ -40,13 +41,15 @@ export class MountainComponent implements AfterContentInit, OnChanges {
       this.plane.yNumberSegments
     );
     const material = new THREE.MeshPhongMaterial({
-      color: '#6000C7'
+      color: '#6000C7',
+      side: THREE.DoubleSide,
+      wireframe: true
     });
-    // const mesh = new THREE.Mesh(geometry, material);
-    const mesh = new THREE.Mesh(
-      new THREE.CubeGeometry( 1, 1, 1 ),
-      new THREE.MeshNormalMaterial()
-  );
+    const mesh = new THREE.Mesh(geometry, material);
+  //   const mesh = new THREE.Mesh(
+  //     new THREE.CubeGeometry( 1, 1, 1 ),
+  //     new THREE.MeshNormalMaterial()
+  // );
     // Create the renderer, camera and scene we will plot each frame.
     this.three.renderer = new THREE.WebGLRenderer({alpha: this.renderer.alpha});
     this.three.renderer.setClearColor(0x333F47, 1);
@@ -59,7 +62,7 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     this.three.camera.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
     // this.three.camera.rotateX(5);
     const light = new THREE.PointLight(0xffffff);
-    light.position.set(100, 200, -100);
+    light.position.set(this.light.position.x, this.light.position.y, this.light.position.z);
     this.three.scene.add(light);
     const controls = new OrbitControls(this.three.camera, this.three.renderer.domElement);
     this.animate();
