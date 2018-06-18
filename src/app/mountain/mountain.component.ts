@@ -16,19 +16,19 @@ export class MountainComponent implements AfterContentInit, OnChanges {
    * Plane geometry parameters
    * The plane is always along the x and y axis.
    */
-  @Input() plane: {length: number; segments: number};
+  @Input() plane: { length: number; segments: number };
   /**
    * The camera is composed of the angle (y axis) spread of camera (fov),
    * the aspect which determines the spread in (x axis),
    * the near and far plane which determines what volume is included in the field of view,
    * and the position of the camera.
    */
-  @Input() camera: {position: IPosition, fov: number; aspect: number; near: number; far: number};
-  @Input() renderer: {alpha: boolean};
-  @Input() light: {position: IPosition};
-  three: {scene: THREE.Scene; camera: THREE.PerspectiveCamera; renderer: THREE.WebGLRenderer};
+  @Input() camera: { position: IPosition, fov: number; aspect: number; near: number; far: number };
+  @Input() renderer: { alpha: boolean };
+  @Input() light: { position: IPosition };
+  three: { scene: THREE.Scene; camera: THREE.PerspectiveCamera; renderer: THREE.WebGLRenderer };
   constructor() {
-    this.three = {scene: undefined, camera: undefined, renderer: undefined};
+    this.three = { scene: undefined, camera: undefined, renderer: undefined };
     this.images = [
       'assets/green0.jpeg',
       'assets/green1.jpeg',
@@ -61,17 +61,24 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     centreMountain(geometry, 20000000, 20);
     const materials = createMesh(this.images);
     // randomMaterials(geometry, this.images.length);
-    materialHeightSegment(geometry, 0, 2, 0, 0.01);
-    materialHeightSegment(geometry, 3, 5, 0.01, 0.2);
-    materialHeightSegment(geometry, 5, 8, 0.2, 0.7);
-    materialHeightSegment(geometry, 9, 9, 0.7, 1);
-    const mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial( materials ));
-  //   const mesh = new THREE.Mesh(
-  //     new THREE.CubeGeometry( 1, 1, 1 ),
-  //     new THREE.MeshNormalMaterial()
-  // );
+    // materialHeightSegment(geometry, 0, 2, 0, 0.01);
+    // materialHeightSegment(geometry, 3, 5, 0.01, 0.2);
+    // materialHeightSegment(geometry, 5, 8, 0.2, 0.7);
+    // materialHeightSegment(geometry, 9, 9, 0.7, 1);
+
+    materialHeightAngleSegment(geometry, 2, 2, 0, 0.2, 0, 360);
+    // materialHeightAngleSegment(geometry, 1, 2, 0, 0.01, 90, 360);
+    // materialHeightSegment(geometry, 3, 5, 0.01, 0.2);
+    // materialHeightSegment(geometry, 5, 8, 0.2, 0.7);
+    // materialHeightSegment(geometry, 9, 9, 0.7, 1);
+
+    const mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+    //   const mesh = new THREE.Mesh(
+    //     new THREE.CubeGeometry( 1, 1, 1 ),
+    //     new THREE.MeshNormalMaterial()
+    // );
     // Create the renderer, camera and scene we will plot each frame.
-    this.three.renderer = new THREE.WebGLRenderer({alpha: this.renderer.alpha});
+    this.three.renderer = new THREE.WebGLRenderer({ alpha: this.renderer.alpha });
     this.three.renderer.setClearColor(0x333F47, 1);
     // this.three.renderer = new THREE.WebGLRenderer();
     this.three.renderer.setSize(this.el.clientWidth, this.el.clientHeight);
@@ -89,7 +96,7 @@ export class MountainComponent implements AfterContentInit, OnChanges {
   }
   onResize(event) {
     this.camera.aspect = this.el.clientWidth / this.el.clientHeight;
-    this.three.renderer.setSize( this.el.clientWidth , this.el.clientHeight );
+    this.three.renderer.setSize(this.el.clientWidth, this.el.clientHeight);
     this.three.camera.updateProjectionMatrix();
 
   }
@@ -111,6 +118,9 @@ export class MountainComponent implements AfterContentInit, OnChanges {
   }
 
 }
+function toRad (angle) {
+  return angle * (Math.PI / 180);
+}
 /**
  * Create Mountain from random plane geometry.
  * Geometry has a list of vertices which equate to x and y.
@@ -119,8 +129,8 @@ export class MountainComponent implements AfterContentInit, OnChanges {
  * The variance factor is the multiple of the variance 
  */
 
- function centreMountain(geometry: THREE.PlaneGeometry, normal: number, varianceFactor: number) {
-  const lastVertex = geometry.vertices[geometry.vertices.length - 1 ];
+function centreMountain(geometry: THREE.PlaneGeometry, normal: number, varianceFactor: number) {
+  const lastVertex = geometry.vertices[geometry.vertices.length - 1];
   const vara = Math.abs(lastVertex.x) * varianceFactor;
   const sigma = [[vara, 0], [0, vara]];
   const mu = [0, 0];
@@ -129,15 +139,15 @@ export class MountainComponent implements AfterContentInit, OnChanges {
     mu
   };
   const multiGaussian = new MultiGaussian(param);
-  const distribution = gaussian(0 , 30 * Math.abs(lastVertex.x));
+  const distribution = gaussian(0, 30 * Math.abs(lastVertex.x));
   for (let i = 0; i < geometry.vertices.length; i++) {
     const zIncrease = normal * multiGaussian.density([geometry.vertices[i].x, geometry.vertices[i].y]);
-    const newZ =  geometry.vertices[i].z + zIncrease;
+    const newZ = geometry.vertices[i].z + zIncrease;
     geometry.vertices[i].z = newZ;
     // console.log(`${i} x: ${geometry.vertices[i].x} y: ${geometry.vertices[i].y} z: ${geometry.vertices[i].z}`);
   }
 
- }
+}
 /**
  * Add random variance to vertices.
  */
@@ -161,7 +171,7 @@ function gaussianCentre(x: number, normal = 1, variance = 1, mean = 0) {
 
 function randomMaterials(geometry: THREE.PlaneGeometry, num: number) {
   for (let i = 0; i < geometry.faces.length; i++) {
-    geometry.faces[ i ].materialIndex = Math.floor(Math.random() * num);
+    geometry.faces[i].materialIndex = Math.floor(Math.random() * num);
     // geometry.faces[ i ].materialIndex = 0;
   }
 }
@@ -173,21 +183,49 @@ function randomMaterials(geometry: THREE.PlaneGeometry, num: number) {
 function materialHeightSegment(geometry: THREE.PlaneGeometry, minImage: number, maxImage: number, fracMin: number, fracMax: number) {
   const maxHeight = getMaxHeight(geometry) + 1; // Add small increase to get top.
   for (let i = 0; i < geometry.faces.length; i++) {
-    const face = geometry.faces[ i ];
-    const height = geometry.vertices[ face.a ].z;
+    const face = geometry.faces[i];
+    const vertexPos = geometry.vertices[face.a];
+    const height = vertexPos.z;
     // console.log(height);
-    if ( maxHeight * fracMin < height && maxHeight * fracMax > height ) {
-      geometry.faces[ i ].materialIndex = Math.floor(Math.random() * (maxImage - minImage)) + minImage;
+    if (maxHeight * fracMin < height && maxHeight * fracMax > height) {
+      geometry.faces[i].materialIndex = Math.floor(Math.random() * (maxImage - minImage)) + minImage;
     }
   }
+}
+
+function materialHeightAngleSegment(geometry: THREE.PlaneGeometry,
+  minImage: number, maxImage: number, fracMin: number, fracMax: number, phiMin: number, phiMax: number) {
+  const maxHeight = getMaxHeight(geometry) + 1; // Add small increase to get top.
+  for (let i = 0; i < geometry.faces.length; i++) {
+    const face = geometry.faces[i];
+    const vertexPos = geometry.vertices[face.a];
+    const height = vertexPos.z;
+    const spherical = cartesianToSpherical(vertexPos.x, vertexPos.y, vertexPos.z);
+    console.log(`Angles ${toRad(phiMin)} ${toRad(phiMax)} ${spherical.phi}`);
+    if (maxHeight * fracMin < height && maxHeight * fracMax > height && spherical.phi > toRad(phiMin) && spherical.phi < toRad(phiMax)) {
+      geometry.faces[i].materialIndex = Math.floor(Math.random() * (maxImage - minImage)) + minImage;
+    }
+  }
+}
+
+function cartesianToSpherical(x, y, z) {
+  const radius = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+  const theta = Math.acos(z / radius);
+  const phi = Math.atan(y / x);
+  // console.log(`X/Y ${y} ${z} ${phi}`);
+  return {
+    radius,
+    theta,
+    phi
+  };
 }
 
 function getMaxHeight(geometry) {
   let temp = 0;
   for (let i = 0; i < geometry.faces.length; i++) {
-    const face = geometry.faces[ i ];
-    const height = geometry.vertices[ face.a ].z;
-    if (height > temp){
+    const face = geometry.faces[i];
+    const height = geometry.vertices[face.a].z;
+    if (height > temp) {
       temp = height;
     }
   }
@@ -197,8 +235,8 @@ function getMaxHeight(geometry) {
 function createMesh(images: Array<string>) {
   const materials = [];
   // for (let i = 0; i < images.length; i++) {
-    images.forEach(async (image) => {
-    const texture = await new THREE.TextureLoader().load( image );
+  images.forEach(async (image) => {
+    const texture = await new THREE.TextureLoader().load(image);
     const material = new THREE.MeshLambertMaterial({
       map: texture
     });
