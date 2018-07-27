@@ -213,6 +213,7 @@ function cartesianToSpherical(x, y, z) {
   const theta = Math.acos(z / radius);
   const phi = Math.atan(y / x);
   // console.log(`X/Y ${y} ${z} ${phi}`);
+  console.log(`${x} ${y} ${z} ${radius} ${theta} ${phi}`);
   return {
     radius,
     theta,
